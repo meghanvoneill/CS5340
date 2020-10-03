@@ -69,7 +69,7 @@ def read_data_file(file_name):
                 # If an integer is found:
                 if word.isdigit():
                     # If label found:
-                    if int(word) is 1 or int(word) is 0:
+                    if int(word) == 1 or int(word) == 0:
                         data_set['instances'].append(new_instance)
                         new_instance = [int(word)]
                     # Not a label, add the word to the previous instance.
