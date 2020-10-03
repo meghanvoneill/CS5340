@@ -4,10 +4,10 @@ S -> X2 PP   .60
 S -> VERB PP .30
 S -> VP PP   .18
 S -> book    .16
-VP -> VERB NP .30
+VP -> VERB NP .50
 VP -> X2 PP   .20
 X2 -> VERB NP .80
-VP -> VERB NP .50
+VP -> VERB PP .50
 VP -> VP PP   .25
 VP -> book    .20
 NP -> DET NOM .60
