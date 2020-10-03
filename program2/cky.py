@@ -6,6 +6,7 @@ from pprint import pprint
 # Natural Language Processing, Fall 2020, Professor Riloff, University of Utah
 
 # Test run with: python3 cky.py data/pcfg-tiny.txt data/sentences-tiny.txt
+# Test run with: python3 cky.py data/pcfg-example.txt data/sentences-example.txt
 def main():
 
     # Read in arguments.
