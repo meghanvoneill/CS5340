@@ -5,7 +5,8 @@ from pprint import pprint
 # For Program 2: CKY Parser with PCFG
 # Natural Language Processing, Fall 2020, Professor Riloff, University of Utah
 
-# Test run with: python3 cky.py data/pcfg-tiny.txt data/sentences-tiny.txt
+# Test run with: python3 cky.py data/pcfg-tiny.txt data/sentences-tiny.txt > data/sentences-tiny.txt.cky
+# Test run with: python3 cky.py data/pcfg-example.txt data/sentences-example.txt > data/sentences-example.txt.cky
 def main():
 
     # Read in arguments.
