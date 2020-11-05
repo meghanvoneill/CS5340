@@ -15,12 +15,10 @@ def read_story_IDs(file_name):
     with open(file_name, 'r') as f:
         # Extract the path for the story files.
         path = Path(f.readline().strip())
-        print('path: ' + str(path))
 
         # Read in the story ID file names.
         for line in f.readlines():
             story_ID = line.strip()
-            print('story_ID: ' + str(story_ID))
             story_IDs[story_ID] = {'story': {}, 'questions': {}}
 
     f.close()
@@ -47,17 +45,20 @@ def read_story(story_file_name):
 
     # Read the story for the given file name.
     with open(story_file_name, 'r') as s:
-        headline = s.readline().strip()
-        date = s.readline().strip()
+        # Read in the headline and date.
+        headline = remove_prefix(s.readline().strip(), 'HEADLINE: ')
+        date = remove_prefix(s.readline().strip(), 'DATE: ')
         text = ''
-        s.readline()
-        s.readline()
 
-        # TODO: Clean up text.
+        # Skip past blank lines.
+        for i in range(5):
+            s.readline()
+
+        # Read text lines while removing newline characters.
         for line in s.readlines():
-            text += line
+            text += line.replace('\n', ' ')
 
-        story = {'headline': headline.split()[1:], 'date': date.split()[1:], 'text': text}
+        story = {'headline': headline, 'date': date, 'text': text.strip()}
 
     return story
 
@@ -74,9 +75,9 @@ def read_questions(questions_file_name):
         lines = q.readlines()
         for index in range(0, len(lines), 4):
             if lines[index].startswith('QuestionID:'):
-                question_ID = lines[index].strip()
-                question_text = lines[index + 1].strip()
-                difficulty = lines[index + 2]
+                question_ID = remove_prefix(lines[index].strip(), 'QuestionID: ')
+                question_text = remove_prefix(lines[index + 1].strip(), 'Question: ')
+                difficulty = remove_prefix(lines[index + 2].strip(), 'Difficulty: ')
 
                 questions[question_ID] = {'question': question_text, 'difficulty': difficulty}
 
