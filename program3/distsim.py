@@ -190,7 +190,7 @@ def build_vocabulary(training_sentences, context_window_size, stopwords, frequen
 
             # If word is a stopword, has no alphabetical letters, or has a frequency count of 1, do not add it.
             frequency = frequencies['frequencies, index by word'][word]['frequency']
-            if word not in stopwords and word not in punctuation and frequency > 1:
+            if word not in stopwords and word not in punctuation: # and frequency > 1:
                 # If we can remove punctuation from the word and still have characters, the word must contain
                 #   alphanumeric characters.
                 punc_removed_word = word.translate(str.maketrans('', '', string.punctuation))
