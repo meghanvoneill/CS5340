@@ -4,9 +4,9 @@ from pathlib import Path
 # Reads the given file to gather story ID file names. Returns a dictionary with the story IDs and there collected
 # stories and questions.
 #
-#   story_IDs = {story_ID: {'story': {}, 'questions': {}}}
+#   story_IDs = {story_ID: {'story': {}, 'questions': []}}
 #       story = {'headline': '', 'date': '', 'text': ''}
-#       questions = {'question_ID': {'question': '', 'difficulty': ''}}
+#       questions = [question = {'question_ID': '', 'question': '', 'difficulty': ''}]
 def read_story_IDs(file_name):
 
     story_IDs = {}
@@ -19,7 +19,7 @@ def read_story_IDs(file_name):
         # Read in the story ID file names.
         for line in f.readlines():
             story_ID = line.strip()
-            story_IDs[story_ID] = {'story': {}, 'questions': {}}
+            story_IDs[story_ID] = {'story': {}, 'questions': []}
 
     f.close()
 
@@ -65,10 +65,10 @@ def read_story(story_file_name):
 
 # Read the questions for the given question file.
 #
-#   questions = {'question_ID': {'question': '', 'difficulty': ''}}
+#   questions = [question = {'question_ID': '', 'question': '', 'difficulty': ''}]
 def read_questions(questions_file_name):
 
-    questions = {}
+    questions = []
 
     # Read the questions for the given file name.
     with open(questions_file_name, 'r') as q:
@@ -79,7 +79,8 @@ def read_questions(questions_file_name):
                 question_text = remove_prefix(lines[index + 1].strip(), 'Question: ')
                 difficulty = remove_prefix(lines[index + 2].strip(), 'Difficulty: ')
 
-                questions[question_ID] = {'question': question_text, 'difficulty': difficulty}
+                question = {'question_ID': question_ID, 'question': question_text, 'difficulty': difficulty}
+                questions.append(question)
 
     return questions
 
