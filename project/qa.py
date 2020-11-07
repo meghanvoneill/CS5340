@@ -5,18 +5,17 @@ from pprint import pprint
 
 def main():
 
-    answers = input_processing.read_answers('test_input.txt')
-    words, counts = input_processing.count_answers(answers)
-    w_c = list(zip(words, counts))
-    sorted_w_c = sorted(w_c, key=lambda x: x[1], reverse=True)
-    print(sorted_w_c)
+    # answers = input_processing.read_answers('test_input.txt')
+    # words, counts = input_processing.count_answers(answers)
+    # w_c = list(zip(words, counts))
+    # sorted_w_c = sorted(w_c, key=lambda x: x[1], reverse=True)
+    # print(sorted_w_c)
     # input_processing.write_answer_key('test_input.txt')
 
-
     # Read in arguments.
-    # args = sys.argv[1:]
-    # input_file = args[0]
-    input_file = 'test_input.txt'
+    args = sys.argv[1:]
+    input_file = args[0]
+    # input_file = 'test_input.txt'
 
     # Gather story IDs, stories, and questions.
     story_IDs = input_processing.read_story_IDs(input_file)
