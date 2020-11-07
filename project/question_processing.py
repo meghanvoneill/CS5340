@@ -1,33 +1,33 @@
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.linear_model import SGDClassifier
-import tensorflow as tf
-import numpy
+#from sklearn.feature_extraction.text import CountVectorizer
+#from sklearn.linear_model import SGDClassifier
+#import tensorflow as tf
+#import numpy
 from project import input_processing
 
 
 def main():
 
-    question_type_words = ['who', 'where', 'when', 'how', 'which', 'what']
-    all_labels = []
-    input_file = 'test_input.txt'
-    story_IDs = input_processing.read_story_IDs(input_file)
-    classifiers = []
-
-    # Generate labeled data for each question type word.
-    for word in question_type_words:
-        questions, labels = generate_labeled_question_data(word, story_IDs)
-        print(labels)
-        all_labels.append(labels)
-
-        # Vectorize questions.
-        vectorizer = CountVectorizer()
-        vectors = vectorizer.fit_transform(questions)
-
-        # Stochastic gradient descent optimizer.
-        classifier = SGDClassifier(max_iter=1000, tol=1e-3)
-        acc = classifier.fit(vectors, labels).score(vectors, labels)
-        classifiers.append(classifier)
-        print(acc)
+    # question_type_words = ['who', 'where', 'when', 'how', 'which', 'what']
+    # all_labels = []
+    # input_file = 'test_input.txt'
+    # story_IDs = input_processing.read_story_IDs(input_file)
+    # classifiers = []
+    #
+    # # Generate labeled data for each question type word.
+    # for word in question_type_words:
+    #     questions, labels = generate_labeled_question_data(word, story_IDs)
+    #     print(labels)
+    #     all_labels.append(labels)
+    #
+    #     # Vectorize questions.
+    #     vectorizer = CountVectorizer()
+    #     vectors = vectorizer.fit_transform(questions)
+    #
+    #     # Stochastic gradient descent optimizer.
+    #     classifier = SGDClassifier(max_iter=1000, tol=1e-3)
+    #     acc = classifier.fit(vectors, labels).score(vectors, labels)
+    #     classifiers.append(classifier)
+    #     print(acc)
 
     return
 
