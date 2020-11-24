@@ -16,9 +16,9 @@ nlp = en_core_web_sm.load()
 def main():
 
     # Read in arguments.
-    args = sys.argv[1:]
-    input_file = args[0]
-    # input_file = 'test_input.txt'
+    # args = sys.argv[1:]
+    # input_file = args[0]
+    input_file = 'test_input.txt'
 
     # Gather story IDs, stories, and questions.
     story_IDs = input_processing.read_story_IDs(input_file)
