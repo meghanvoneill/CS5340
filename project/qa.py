@@ -10,14 +10,15 @@ import en_core_web_sm
 nlp = en_core_web_sm.load()
 
 
+# Author: Meghan V. O'Neill
+# Submission for NLP Project: Question Answering System
+# Natural Language Processing, Fall 2020, Professor Riloff, University of Utah
 def main():
 
-    random.seed(49)
-
     # Read in arguments.
-    # args = sys.argv[1:]
-    # input_file = args[0]
-    input_file = 'test_input.txt'
+    args = sys.argv[1:]
+    input_file = args[0]
+    # input_file = 'test_input.txt'
 
     # Gather story IDs, stories, and questions.
     story_IDs = input_processing.read_story_IDs(input_file)
@@ -27,8 +28,8 @@ def main():
     answers = answer_questions(story_IDs)
 
     # Write response file.
-    # output_processing.write_response_standard_output(answers)
-    output_processing.write_response_file(answers, 'test_2.response')
+    output_processing.write_response_standard_output(answers)
+    # output_processing.write_response_file(answers, 'test_2.response')
 
     return
 
@@ -44,39 +45,30 @@ def answer_questions(story_IDs):
 
     # For every story, examine the questions associated.
     for story_meta in story_IDs:
-        # TODO: Implement entity recognition and identify elements of the story.
         ner_results_tree, entities, chunked_entities = ner_on_doc(story_meta['story']['text'])
         numbers = get_numbers(story_meta['story']['text'])
         doc = nlp(story_meta['story']['text'])
         spacy_results = [(X.text, X.label_) for X in doc.ents]
-        pprint([(X.text, X.label_) for X in doc.ents])
-        print('\n')
-
-        # TODO: Generate the story data once, and reuse it for each question.
 
         for question in story_meta['questions']:
-            answer = answer_question(story_meta['story'], ner_results_tree, chunked_entities, spacy_results, numbers, question['question'])
+            answer = answer_question(story_meta['story'], chunked_entities, spacy_results, numbers, question['question'])
             answers.append((question['question_ID'], answer))
 
     return answers
 
 
 # Returns an answer to a single question, given a story and the question.
-def answer_question(story, ner_tree, entities, spacy_results, numbers, question, k_possible_answers=1):
-
-    answers = []
+def answer_question(story, entities, spacy_results, numbers, question, k_possible_answers=1):
 
     # Classify the question type to determine the entity type we are looking for.
     entity_type = question_type(question)
 
     # TODO: Implement entity recognition and identify elements of question that match the entity type identified.
-    answer_candidates = choose_answer_candidates(question, entity_type, ner_tree, entities, spacy_results, numbers)
-    print(answer_candidates)
+    answer_candidates = choose_answer_candidates(question, entity_type, entities, spacy_results, numbers)
 
     # TODO: Rank answers.
 
-
-    # TODO: Select answer.
+    # Select answer.
     if len(answer_candidates) == 0:
         chosen_answer = choose_best_guess_common_label(entity_type)
     else:
@@ -88,9 +80,7 @@ def answer_question(story, ner_tree, entities, spacy_results, numbers, question,
 def question_type(question):
 
     entity_type = 2
-
     words_in_question = question.split()
-
     word = words_in_question[0].lower()
 
     # who: person, organization, or country
@@ -115,6 +105,7 @@ def question_type(question):
     # which: [which city] = a place
     elif word == 'which':
         entity_type = 5
+    # why: [why do] = an explanation
     # elif word == 'why':
     #     entity_type = 6
 
@@ -130,9 +121,15 @@ def question_type(question):
 #   [which, 5 = place:                                  'GPE']
 #   [why, 6 = explanation:                              text]
 #
-def choose_answer_candidates(question, entity_type, ner_tree, entities, spacy_results, numbers):
+def choose_answer_candidates(question, entity_type, entities, spacy_results, numbers):
 
     candidate_answers = []
+
+    # print(question)
+    # print('entities: ')
+    # pprint(entities)
+    # print('spacy_results:')
+    # pprint(spacy_results)
 
     if entity_type == 0:
         candidate_answers.append([word for word, label in spacy_results if label == 'PERSON'])
@@ -148,8 +145,6 @@ def choose_answer_candidates(question, entity_type, ner_tree, entities, spacy_re
     elif entity_type == 2:
         candidate_answers.append([word for word, label in spacy_results if label == 'DATE'])
         candidate_answers.append([word for word, label in spacy_results if label == 'TIME'])
-        # candidate_answers.append(entities['GPE'])
-        # candidate_answers.append(numbers)
     elif entity_type == 3:
         candidate_answers.append([word for word, label in spacy_results if label == 'PERSON'])
         candidate_answers.append([word for word, label in spacy_results if label == 'ORG'])
@@ -160,28 +155,14 @@ def choose_answer_candidates(question, entity_type, ner_tree, entities, spacy_re
     elif entity_type == 4:
         candidate_answers.append(['$' + word for word, label in spacy_results if label == 'MONEY'])
         candidate_answers.append([word for word, label in spacy_results if label == 'QUANTITY'])
-        # candidate_answers.append(numbers)
     elif entity_type == 5:
         candidate_answers.append([word for word, label in spacy_results if label == 'LOC'])
-        # candidate_answers.append(entities['GPE'])
 
     candidates = []
     for arr in candidate_answers:
         for word in arr:
             if word not in candidates:
                 candidates.append(word)
-
-    # Remove partial duplicates.
-    cleaned_candidates = []
-
-    # for word in candidates:
-    #     duplicate = False
-    #     split_word = word.split()
-    #     for w in split_word:
-    #         if w in cleaned_candidates:
-    #             duplicate = True
-    #     if not duplicate:
-    #         cleaned_candidates.append(word)
 
     cleaned_candidates = condense_answer_options(candidates)
 
@@ -256,14 +237,12 @@ def ner_on_doc(document):
         entities_of_sentence = []
         index = 0
         while index < len(bio_tagging):
-
             word_tuple = bio_tagging[index]
             bio_tag = word_tuple[2]
 
             # If this tag is not a 'O', or outside, add it to the sentence's possible entities.
-            if bio_tag.startswith('O') == False:
+            if bio_tag.startswith('O') is False:
                 entities_of_sentence.append(word_tuple)
-
             index += 1
         # Add the entities for this sentence to the entities list.
         entities.append(entities_of_sentence)
@@ -323,7 +302,6 @@ def chunking_on_sentence(sentence):
 #   https://stackoverflow.com/questions/48660547/how-can-i-extract-gpelocation-using-nltk-ne-chunk
 def get_all_chunks(chunked_tree, label):
 
-    prev = None
     all_chunks = []
     current = []
 
