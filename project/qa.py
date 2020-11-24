@@ -12,6 +12,8 @@ nlp = en_core_web_sm.load()
 
 def main():
 
+    random.seed(49)
+
     # Read in arguments.
     # args = sys.argv[1:]
     # input_file = args[0]
@@ -68,7 +70,7 @@ def answer_question(story, ner_tree, entities, spacy_results, numbers, question,
     entity_type = question_type(question)
 
     # TODO: Implement entity recognition and identify elements of question that match the entity type identified.
-    answer_candidates = choose_answer_candidates(entity_type, ner_tree, entities, spacy_results, numbers)
+    answer_candidates = choose_answer_candidates(question, entity_type, ner_tree, entities, spacy_results, numbers)
     print(answer_candidates)
 
     # TODO: Rank answers.
@@ -102,7 +104,8 @@ def question_type(question):
         entity_type = 2
     # what: person, place, or thing
     elif word == 'what':
-        if words_in_question[1].lower() == 'year':
+        if words_in_question[1].lower() == 'year' or words_in_question[1].lower() == 'month' or \
+                words_in_question[1].lower() == 'day' or words_in_question[1].lower() == 'time':
             entity_type = 2
         else:
             entity_type = 3
@@ -119,14 +122,15 @@ def question_type(question):
 
 
 # Entity types will be classified as follows:
-#   [0 = person, organization, or country:      'PERSON', 'ORGANIZATION']
-#   [1 = location:                              'GPE']
-#   [2 = date, or time:                         'GPE', number]
-#   [3 = person, place, or thing:               'PERSON', 'ORGANIZATION', non-named object?]
-#   [4 = quantity, or amount:                   number]
-#   [5 = place:                                 'GPE']
+#   [who, 0 = person, organization, or country:         'PERSON', 'ORGANIZATION']
+#   [where, 1 = location:                               'GPE']
+#   [when, what year, 2 = date, or time:                'GPE', number]
+#   [what, 3 = person, place, or thing:                 'PERSON', 'ORGANIZATION', non-named object?]
+#   [how, 4 = quantity, or amount:                      number]
+#   [which, 5 = place:                                  'GPE']
+#   [why, 6 = explanation:                              text]
 #
-def choose_answer_candidates(entity_type, ner_tree, entities, spacy_results, numbers):
+def choose_answer_candidates(question, entity_type, ner_tree, entities, spacy_results, numbers):
 
     candidate_answers = []
 
@@ -139,6 +143,7 @@ def choose_answer_candidates(entity_type, ner_tree, entities, spacy_results, num
     elif entity_type == 1:
         candidate_answers.append([word for word, label in spacy_results if label == 'LOC'])
         candidate_answers.append([word for word, label in spacy_results if label == 'GPE'])
+        candidate_answers.append([word for word, label in spacy_results if label == 'FAC'])
         candidate_answers.append(entities['GPE'])
     elif entity_type == 2:
         candidate_answers.append([word for word, label in spacy_results if label == 'DATE'])
@@ -168,16 +173,49 @@ def choose_answer_candidates(entity_type, ner_tree, entities, spacy_results, num
 
     # Remove partial duplicates.
     cleaned_candidates = []
-    for word in candidates:
-        duplicate = False
-        split_word = word.split()
-        for w in split_word:
-            if w in cleaned_candidates:
-                duplicate = True
-        if not duplicate:
-            cleaned_candidates.append(word)
+
+    # for word in candidates:
+    #     duplicate = False
+    #     split_word = word.split()
+    #     for w in split_word:
+    #         if w in cleaned_candidates:
+    #             duplicate = True
+    #     if not duplicate:
+    #         cleaned_candidates.append(word)
+
+    cleaned_candidates = condense_answer_options(candidates)
 
     return cleaned_candidates
+
+
+def condense_answer_options(answers):
+
+    length_sorted_answers = sorted(answers, key=len)
+    new_answers = []
+
+    # Grab the words by the shortest first.
+    for short_answer in length_sorted_answers:
+        # For each answer to compare this to, if we find any that contain this answer already, do not add
+        # the short answer.
+        add = True
+        found_duplicate_component = False
+        for answer in length_sorted_answers:
+            # Skip if comparing to itself.
+            if short_answer == answer:
+                continue
+            else:
+                answer_split = answer.split()
+                # If the short answer is contained by the answer, we have found a duplicate.
+                if short_answer in answer_split:
+                    found_duplicate_component = True
+                    continue
+
+        if found_duplicate_component:
+            add = False
+        if add:
+            new_answers.append(short_answer)
+
+    return new_answers
 
 
 def choose_best_guess_common_label(entity_type):
